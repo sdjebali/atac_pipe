@@ -4,7 +4,7 @@
 # and because of the new path to picard tools and also maybe new way of specifying output
 # for samtools sort and the fact that most bam files did not have the .bam extension with bowtie.sh
 
-# Will make peaks from atacseq pe reads using bowtie and macs
+# Will make peaks from atacseq pe reads using bowtie2 and macs2
 # uses 4 threads for mapping and needs at least 40G of ram
 # recommended to send it to cluster with 4 threads and 16G per thread
 # a test sample is in 
@@ -58,11 +58,6 @@ fastq2base=`basename $fastq2`
 ###########
 path="`dirname \"$0\"`"             # relative path
 rootDir="`( cd \"$path\" && pwd )`" # absolute path
-## binaries and scripts
-#######################
-binDir=$rootDir/bin
-awkDir=$rootDir/src/awk
-bashDir=$rootDir/src/bash
 ## Output file directories
 ###########################
 # a. trimming
@@ -75,21 +70,15 @@ mapdir=$outdir/mapping
 peakdir=$outdir/peaks
 # Programs and scripts
 ######################
-# Bin
-#####
-trim=$binDir/trim_galore
-fastqc=$binDir/fastqc
-# Bash
-######
-map=$bashDir/bowtie2.sh
-peak=$bashDir/bam2peaks2.sh
+map=$rootDir/bowtie2.sh
+peak=$rootDir/bam2peaks2.sh
 
 
 
 ###########
 ## START  #
 ###########
-header="Executing atac_pipe_pre.sh"
+header="Executing atac_pipe_pre2.sh"
 echo $header
 eval "for i in {1..${#header}};do printf \"-\";done"
 printf "\n\n"
@@ -116,7 +105,7 @@ mkdir -p $peakdir
 # - ~/fragencode/data/reads/atacseq/sus_scrofa/liver/ATAC62/ATAC62_atacseq_combined_R2.fastq.gz
 echo I am trimming the reads to remove the adaptors... >&2
 cd $trimdir
-$trim --stringency 3 -q 20 --paired --nextera -o $trimdir $fastq1 $fastq2 > trim_galore.out 2> trim_galore.err
+trim_galore --stringency 3 -q 20 --paired --nextera -o $trimdir $fastq1 $fastq2 > trim_galore.out 2> trim_galore.err
 echo done >&2
 # 2h30 with 1 cpu and 0.5 G used
 # produces files called:
@@ -132,7 +121,7 @@ fastq2trim=$trimdir/${fastq2base%.fastq.gz}_val_2.fq.gz
 ######################################
 echo I am checking the read quality with fastqc... >&2
 cd $qcdir
-$fastqc -o $qcdir --quiet --dir $qcdir $fastq1trim $fastq2trim > fastqc.out 2> fastqc.err
+fastqc -o $qcdir --quiet --dir $qcdir $fastq1trim $fastq2trim > fastqc.out 2> fastqc.err
 echo done >&2
 # 16 minutes with 1 cpu and 1.6G of ram
 # produces files called
@@ -209,7 +198,7 @@ echo done >&2
 # END  #
 ########
 pipelineEnd=$(date +%s)
-echo "atac_pipe_pre for $lid completed in $(echo "($pipelineEnd-$pipelineStart)/60" | bc -l | xargs printf "%.2f\n") min " >&2
+echo "atac_pipe_pre2 for $lid completed in $(echo "($pipelineEnd-$pipelineStart)/60" | bc -l | xargs printf "%.2f\n") min " >&2
 
 # disable extglob
 shopt -u extglob

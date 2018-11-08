@@ -4,7 +4,6 @@ myname=$(basename "$0")
 echo "##### `date` ####"
 echo "# Starting command: $0 $@"
 
-module load bioinfo/Java8
 
 default_picard="/work/project/fragencode/tools/multi/picard-tools-2.1.1/picard.jar"
 default_mt="MT"
@@ -124,7 +123,6 @@ samtools flagstat $nomt > $nomt.flagstat
 green "## ... summary stats for $nomt done"
 
 blue "# ...Removing duplicates"
-module load bioinfo/Java8
 java -jar -Xmx4g $picard MarkDuplicates I=$nomt O=$nodup M=$nodup.metrics.txt REMOVE_DUPLICATES=true 
 green "## ...removing duplicates done in $nodup (log in $nodup.metrics.txt )"
 
